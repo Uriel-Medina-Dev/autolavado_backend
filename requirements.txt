@@ -1,0 +1,11 @@
+# Dependencias principales
+fastapi
+uvicorn
+sqlalchemy
+
+# Base de datos (elige solo una según tu motor)
+pymysql  # Para MySQL 
+# psycopg2-binary==2.9.9  # Para PostgreSQL
+
+# Herramientas de linting y testing
+pylint

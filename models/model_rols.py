@@ -1,13 +1,20 @@
-''' Esta clase representa la tabla rols de usuario '''
-from sqlalchemy import Column, Integer, String, Boolean
-from config.db import Base
+"""Esta clase representa la tabla rols de usuario."""
+from sqlalchemy import Column, Integer, String, Boolean, DateTime
+from sqlalchemy.sql import func
+from config.db import Base  # Ahora debería funcionar
+
 
 class Rols(Base):
-    ''' En este apartado se define la clase con sus atributos '''
+    """En este apartado se define la clase con sus atributos."""
+
     __tablename__ = "tbc_rol"
     
-    Id = Column(Integer, primary_key = True, index = True)
+    id = Column(Integer, primary_key=True, index=True)
     description = Column(String(60))
     status = Column(Boolean)
-    creation_date = Column
-    modification_date = Column()
+    creation_date = Column(DateTime, server_default=func.now)
+    modification_date = Column(DateTime, onupdate=func.now)
+    
+    # Para evitar la advertencia de "too-few-public-methods"
+    def __repr__(self):
+        return f"<Rols(id={self.id}, description='{self.description}')>"
