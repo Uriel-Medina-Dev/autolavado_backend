@@ -7,7 +7,7 @@ from config.db import Base  # Ahora debería funcionar
 class Rols(Base):
     """En este apartado se define la clase con sus atributos."""
 
-    __tablename__ = "tbc_rol"
+    __tablename__ = "tbc_rols"
     
     id = Column(Integer, primary_key=True, index=True)
     description = Column(String(60))
