@@ -5,10 +5,10 @@ from pydantic import BaseModel
 from datetime import datetime
 class RolBase(BaseModel):
     '''Clase para modelar los campos de tabla Rol'''
-    nombre_rol: str
-    estado: bool
-    fecha_registro: datetime
-    fecha_actualizacion: datetime
+    name:str
+    status: bool
+    creation_date: datetime
+    update_date: datetime
 # pylint: disable=too-few-public-methods, unnecessary-pass
 class RolCreate(RolBase):
     '''Clase para crear un Rol basado en la tabla Rols'''

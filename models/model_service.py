@@ -1,5 +1,6 @@
 '''Esta clase permite generar el modelo para los servicios'''
 from sqlalchemy import Column, Integer, String, Boolean,Float,DateTime
+from sqlalchemy.sql import func
 # pylint: disable=import-error
 from config.db import Base
 

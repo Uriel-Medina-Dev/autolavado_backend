@@ -8,7 +8,7 @@ class User(Base):
     __tablename__ = "tbb_user"
     
     Id = Column(Integer, primary_key = True, index = True)
-    rol_Id = Column(Integer, ForeignKey("tbc_rol.Id"))
+    rol_Id = Column(Integer, ForeignKey("tbc_rols.id"))
     user_name = Column (String(60))
     user_1lastname = Column (String(60))
     user_2lastname = Column (String(60))
