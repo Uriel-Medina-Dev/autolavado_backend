@@ -8,6 +8,7 @@ import models.model_service
 import models.model_vehicle
 import models.model_vehicles_services
 
+from routes.routes_auth import router as auth_router
 from routes.routes_rol import rol
 from routes.routes_services import router as services_router
 from routes.routes_user import router as users_router
@@ -22,6 +23,7 @@ app = FastAPI(
 # Crear todas las tablas registradas por los modelos
 config.db.Base.metadata.create_all(bind=config.db.engine)
 
+app.include_router(auth_router)
 app.include_router(rol)
 app.include_router(services_router)
 app.include_router(users_router)

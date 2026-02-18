@@ -3,6 +3,11 @@ fastapi
 uvicorn
 sqlalchemy
 
+# Autenticación y seguridad
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
+
 # Base de datos (elige solo una según tu motor)
 pymysql  # Para MySQL
 mysqlclient 

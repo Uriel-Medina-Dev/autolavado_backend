@@ -2,6 +2,7 @@
 import models.model_user
 import schemas.schema_user
 from sqlalchemy.orm import Session
+from core.security import get_password_hash
 
 def get_users(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.model_user.User).offset(skip).limit(limit).all()
@@ -16,7 +17,7 @@ def create_user(db: Session, user: schemas.schema_user.UsuarioCreate):
         user_1lastname=user.user_1lastname,
         user_2lastname=user.user_2lastname,
         user=user.user,
-        user_password=user.user_password,
+        user_password=get_password_hash(user.user_password),
         user_address=user.user_address,
         user_phone=user.user_phone,
         status=user.status,
@@ -32,6 +33,8 @@ def update_user(db: Session, user_id: int, user: schemas.schema_user.UsuarioUpda
     db_user = db.query(models.model_user.User).filter(models.model_user.User.Id == user_id).first()
     if db_user:
         for field, value in user.dict(exclude_unset=True).items():
+            if field == "user_password" and value:
+                value = get_password_hash(value)
             setattr(db_user, field, value)
         db.commit()
         db.refresh(db_user)
