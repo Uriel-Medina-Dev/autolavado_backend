@@ -1,5 +1,6 @@
 '''Esta clase permite generar el modelo para los vehiculos'''
 from sqlalchemy import Column, Integer, String, Boolean, DateTime,ForeignKey
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 # pylint: disable=import-error
 from config.db import Base
@@ -19,3 +20,7 @@ class Vehicle(Base):
     estado = Column(Boolean)
     fecha_registro = Column(DateTime)
     fecha_actualizacion = Column(DateTime)
+    
+    # Relaciones
+    usuario = relationship("User", back_populates="vehiculos")
+    servicios = relationship("VehiculoServicio", back_populates="vehiculo")

@@ -1,6 +1,7 @@
 """Esta clase representa la tabla rols de usuario."""
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 from config.db import Base  # Ahora debería funcionar
 
 
@@ -15,6 +16,9 @@ class Rols(Base):
     status = Column(Boolean)
     creation_date = Column(DateTime, server_default=func.now())
     update_date = Column(DateTime, onupdate=func.now())
+    
+    # Relaciones
+    usuarios = relationship("User", back_populates="rol")
     
     # Para evitar la advertencia de "too-few-public-methods"
     def __repr__(self):

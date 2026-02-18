@@ -1,5 +1,6 @@
 '''Esta clase permite generar el modelo para los servicios'''
 from sqlalchemy import Column, Integer, String, Boolean,Float,DateTime
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 # pylint: disable=import-error
 from config.db import Base
@@ -16,3 +17,6 @@ class Servicios(Base):
     estado = Column(Boolean)
     fecha_registro = Column(DateTime)
     fecha_actualizacion = Column(DateTime)
+    
+    # Relaciones
+    solicitudes = relationship("VehiculoServicio", back_populates="servicio")

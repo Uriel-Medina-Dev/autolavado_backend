@@ -19,3 +19,9 @@ class User(Base):
     status = Column(Boolean)
     creation_date = Column(DateTime)
     modification_date = Column(DateTime)
+    
+    # Relaciones
+    rol = relationship("Rols", back_populates="usuarios")
+    vehiculos = relationship("Vehicle", back_populates="usuario", foreign_keys="Vehicle.usuario_Id")
+    servicios_como_cajero = relationship("VehiculoServicio", back_populates="cajero", foreign_keys="VehiculoServicio.cajero_Id")
+    servicios_como_operativo = relationship("VehiculoServicio", back_populates="operativo", foreign_keys="VehiculoServicio.operativo_Id")

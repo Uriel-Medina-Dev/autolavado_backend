@@ -1,5 +1,6 @@
 '''Esta clase permite generar el modelo para las ventas y asignaciones'''
 from sqlalchemy import Column, Integer, Boolean, DateTime, Date, Time, ForeignKey, Enum as SqlEnum
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 import enum 
 from config.db import Base
@@ -28,4 +29,10 @@ class VehiculoServicio(Base):
     estado = Column(Boolean)
     fecha_registro = Column(DateTime, server_default=func.now())
     fecha_actualizacion = Column(DateTime, server_default=func.now(), onupdate=func.now())
+    
+    # Relaciones
+    vehiculo = relationship("Vehicle", back_populates="servicios")
+    cajero = relationship("User", back_populates="servicios_como_cajero", foreign_keys=[cajero_Id])
+    operativo = relationship("User", back_populates="servicios_como_operativo", foreign_keys=[operativo_Id])
+    servicio = relationship("Servicios", back_populates="solicitudes")
 
