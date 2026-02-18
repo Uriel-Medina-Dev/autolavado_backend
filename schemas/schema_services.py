@@ -9,7 +9,7 @@ class ServicioBase(BaseModel):
     nombre: str
     descripcion: str
     costo: float
-    duaracion_minutos: int
+    duracion_minutos: int
     estado: bool
     fecha_registro: datetime
     fecha_actualizacion: datetime
@@ -26,4 +26,4 @@ class Servicio(ServicioBase):
     Id: int
     class Config:
         '''Utilizar el orm para ejecutar las funcionalidades'''
-        orm_mode =True
+        orm_mode = True

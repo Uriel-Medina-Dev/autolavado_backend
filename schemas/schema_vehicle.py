@@ -7,12 +7,13 @@ from pydantic import BaseModel
 
 class VehiculoBase(BaseModel):
     '''Clase para modelar los campos de tabla Vehiculo'''
+    usuario_Id: int
     placa: str
     modelo: str
     serie: str
     color: str
     tipo: str
-    anio: str
+    anio: int
     estado: bool
     fecha_registro: datetime
     fecha_actualizacion: datetime
@@ -29,4 +30,4 @@ class Vehiculo(VehiculoBase):
     Id: int
     class Config:
         '''Utilizar el orm para ejecutar las funcionalidades'''
-        orm_mode =True
+        orm_mode = True
