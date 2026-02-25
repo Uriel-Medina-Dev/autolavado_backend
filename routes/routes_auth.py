@@ -1,7 +1,7 @@
 """Rutas de autenticación"""
 from datetime import timedelta
 from fastapi import APIRouter, HTTPException, Depends, status
-from fastapi.security import HTTPBearer, HTTPAuthCredentials
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 import config.db
 from schemas.schema_auth import Login, Token
@@ -21,7 +21,7 @@ def get_db():
         db.close()
 
 
-async def get_current_user(credentials: HTTPAuthCredentials = Depends(security), db: Session = Depends(get_db)) -> User:
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security), db: Session = Depends(get_db)) -> User:
     """
     Valida el token JWT y retorna el usuario actual
     
