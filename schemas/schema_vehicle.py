@@ -1,33 +1,38 @@
-'''
-Docstring for schemas.schema_vehiculo
-'''
-from typing import Optional
-from datetime import datetime
 from pydantic import BaseModel
+from datetime import datetime
+from typing import Optional
+
 
 class VehiculoBase(BaseModel):
-    '''Clase para modelar los campos de tabla Vehiculo'''
     usuario_Id: int
     placa: str
-    modelo: str
-    serie: str
-    color: str
-    tipo: str
-    anio: int
-    estado: bool
-    fecha_registro: datetime
-    fecha_actualizacion: datetime
-# pylint: disable=too-few-public-methods, unnecessary-pass
+    modelo: Optional[str] = None
+    serie: Optional[str] = None
+    color: Optional[str] = None
+    tipo: Optional[str] = None
+    anio: Optional[int] = None
+    estado: bool = True
+
+
 class VehiculoCreate(VehiculoBase):
-    '''Clase para crear un Vehiculo basado en la tabla Vehiculo'''
-    pass
-class VehiculoUpdate(VehiculoBase):
-    '''Clase para actualizar un Vehiculo basado en la tabla Vehiculo'''
     pass
 
+
+class VehiculoUpdate(BaseModel):
+    usuario_Id: Optional[int] = None
+    placa: Optional[str] = None
+    modelo: Optional[str] = None
+    serie: Optional[str] = None
+    color: Optional[str] = None
+    tipo: Optional[str] = None
+    anio: Optional[int] = None
+    estado: Optional[bool] = None
+
+
 class Vehiculo(VehiculoBase):
-    '''Clase para realizar operaciones por ID en tabla Vehiculo'''
     Id: int
+    fecha_registro: Optional[datetime] = None  # 👈 Permitir None
+    fecha_actualizacion: Optional[datetime] = None  # 👈 Permitir None
+
     class Config:
-        '''Utilizar el orm para ejecutar las funcionalidades'''
-        orm_mode = True
+        from_attributes = True

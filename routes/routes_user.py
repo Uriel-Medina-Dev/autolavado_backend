@@ -5,6 +5,7 @@ import config.db
 import models.model_user as model_user
 import schemas.schema_user as schema_user
 import crud.crud_user as crud
+import crud.crud_rols as crud_rols
 from routes.routes_auth import get_current_user
 from core.security import decode_token
 from typing import List
@@ -36,6 +37,9 @@ def read_user(user_id: int, current_user: model_user.User = Depends(get_current_
 
 @router.post("/", status_code=201)
 def create_user(user: schema_user.UsuarioCreate, db: Session = Depends(get_db)):
+    # validar existencia de rol antes de intentar insertar
+    if not crud_rols.get_rol_by_id(db, user.rol_Id):
+        raise HTTPException(status_code=400, detail="Rol no existe")
     return crud.create_user(db=db, user=user)
 
 

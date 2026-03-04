@@ -8,7 +8,7 @@ python-jose[cryptography]
 #passlib[bcrypt]
 python-multipart
 bcrypt
-
+pyjwt
 # Base de datos (elige solo una según tu motor)
 pymysql  # Para MySQL
 mysqlclient 

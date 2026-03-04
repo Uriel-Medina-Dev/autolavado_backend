@@ -26,6 +26,10 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     Valida el token JWT y retorna el usuario actual
     """
     token = credentials.credentials
+    
+    # Debug
+    print(f"🔍 Token recibido en get_current_user: {token[:30]}...")
+    
     token_data = decode_token(token)
     
     if token_data is None:
@@ -35,31 +39,27 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
             headers={"WWW-Authenticate": "Bearer"},
         )
     
+    print(f"🔍 Buscando usuario con ID: {token_data.user_id}")
+    
     # Buscar por Id (con mayúscula) en la tabla tbb_user
     user = db.query(User).filter(User.Id == token_data.user_id).first()
     
     if user is None:
+        print(f"❌ Usuario con ID {token_data.user_id} no encontrado")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Usuario no encontrado",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    
+    print(f"✅ Usuario autenticado: {user.user}")
     return user
+
 
 @router.post("/login", response_model=Token)
 async def login(credentials: Login, db: Session = Depends(get_db)):
     """
     Endpoint de login que genera un JWT token
-    
-    Args:
-        credentials: Credenciales del usuario (usuario y contraseña)
-        db: Sesión de base de datos
-        
-    Returns:
-        Token JWT si las credenciales son válidas
-        
-    Raises:
-        HTTPException si las credenciales son inválidas
     """
     user = authenticate_user(db, credentials.user, credentials.password)
     if not user:
@@ -84,14 +84,12 @@ async def login(credentials: Login, db: Session = Depends(get_db)):
 async def read_users_me(current_user: User = Depends(get_current_user)):
     """
     Obtiene la información del usuario actual autenticado
-    
-    Returns:
-        Datos del usuario actual
     """
     return {
         "id": current_user.Id,
         "username": current_user.user,
         "name": current_user.user_name,
+        "lastname": f"{current_user.user_1lastname} {current_user.user_2lastname or ''}",
         "email": current_user.user,
         "rol_id": current_user.rol_Id
     }

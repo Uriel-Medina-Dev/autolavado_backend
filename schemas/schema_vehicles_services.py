@@ -1,32 +1,39 @@
-'''
-Docstring for schemas.schema_usuario_vehiculo_servicio
-'''
-from datetime import datetime, date, time
 from pydantic import BaseModel
+from datetime import datetime, date, time
+from typing import Optional
+from models.model_vehicles_services import SolicitudEstatus
+
 
 class UsuariosVehiculoServicioBase(BaseModel):
-    '''Clase para modelar los campos de tabla Usuarios_Vehiculo_Servicio'''
     vehicle_Id: int
     cajero_Id: int
     operativo_Id: int
     servicio_Id: int
     date: date
     time: time
-    estatus: str
-    estado: bool
-    fecha_registro: datetime
-    fecha_actualizacion: datetime
-# pylint: disable=too-few-public-methods, unnecessary-pass
+    estatus: SolicitudEstatus
+    estado: bool = True
+
+
 class UsuariosVehiculoServicioCreate(UsuariosVehiculoServicioBase):
-    '''Clase para asignar un servicio a un vehiculo'''
-    pass
-class UsuariosVehiculoServicioUpdate(UsuariosVehiculoServicioBase):
-    '''Clase para actualizar un servicio a un vehiculo'''
     pass
 
+
+class UsuariosVehiculoServicioUpdate(BaseModel):
+    vehicle_Id: Optional[int] = None
+    cajero_Id: Optional[int] = None
+    operativo_Id: Optional[int] = None
+    servicio_Id: Optional[int] = None
+    date: Optional[date] = None
+    time: Optional[time] = None
+    estatus: Optional[SolicitudEstatus] = None
+    estado: Optional[bool] = None
+
+
 class UsuariosVehiculoServicio(UsuariosVehiculoServicioBase):
-    '''Clase para realizar operaciones por ID en tabla '''
     Id: int
+    fecha_registro: Optional[datetime] = None  # 👈 Permitir None
+    fecha_actualizacion: Optional[datetime] = None  # 👈 Permitir None
+
     class Config:
-        '''Utilizar el orm para ejecutar las funcionalidades'''
-        orm_mode = True
+        from_attributes = True

@@ -8,6 +8,11 @@ import crud.crud_vehicles_services as crud
 from routes.routes_auth import get_current_user
 from typing import List
 
+# 👇 IMPORTANTE: Importar los cruds necesarios
+import crud.crud_vehicle as crud_vehicle
+import crud.crud_user as crud_user
+import crud.crud_service as crud_service
+
 router = APIRouter(prefix="/vehicle_services", tags=["VehicleServices"])
 
 
@@ -20,12 +25,21 @@ def get_db():
 
 
 @router.get("/", response_model=List[schema_vs.UsuariosVehiculoServicio])
-def read_vs(skip: int = 0, limit: int = 100, current_user: model_user.User = Depends(get_current_user), db: Session = Depends(get_db)):
+def read_vs(
+    skip: int = 0, 
+    limit: int = 100, 
+    current_user: model_user.User = Depends(get_current_user), 
+    db: Session = Depends(get_db)
+):
     return crud.get_vehicles_services(db=db, skip=skip, limit=limit)
 
 
 @router.get("/{vs_id}")
-def read_vs_item(vs_id: int, current_user: model_user.User = Depends(get_current_user), db: Session = Depends(get_db)):
+def read_vs_item(
+    vs_id: int, 
+    current_user: model_user.User = Depends(get_current_user), 
+    db: Session = Depends(get_db)
+):
     item = crud.get_vehicle_service_by_id(db=db, vs_id=vs_id)
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
@@ -33,12 +47,37 @@ def read_vs_item(vs_id: int, current_user: model_user.User = Depends(get_current
 
 
 @router.post("/", status_code=201)
-def create_vs(item: schema_vs.UsuariosVehiculoServicioCreate, current_user: model_user.User = Depends(get_current_user), db: Session = Depends(get_db)):
+def create_vs(
+    item: schema_vs.UsuariosVehiculoServicioCreate, 
+    current_user: model_user.User = Depends(get_current_user), 
+    db: Session = Depends(get_db)
+):
+    # Validar vehículo
+    if not crud_vehicle.get_vehicle_by_id(db, item.vehicle_Id):
+        raise HTTPException(status_code=400, detail="Vehículo no existe")
+    
+    # Validar cajero
+    if not crud_user.get_user_by_id(db, item.cajero_Id):
+        raise HTTPException(status_code=400, detail="Usuario cajero no existe")
+    
+    # Validar operativo
+    if not crud_user.get_user_by_id(db, item.operativo_Id):
+        raise HTTPException(status_code=400, detail="Usuario operativo no existe")
+    
+    # Validar servicio
+    if not crud_service.get_service_by_id(db, item.servicio_Id):
+        raise HTTPException(status_code=400, detail="Servicio no existe")
+    
     return crud.create_vehicle_service(db=db, vs=item)
 
 
 @router.put("/{vs_id}")
-def update_vs(vs_id: int, item: schema_vs.UsuariosVehiculoServicioUpdate, current_user: model_user.User = Depends(get_current_user), db: Session = Depends(get_db)):
+def update_vs(
+    vs_id: int, 
+    item: schema_vs.UsuariosVehiculoServicioUpdate, 
+    current_user: model_user.User = Depends(get_current_user), 
+    db: Session = Depends(get_db)
+):
     db_item = crud.update_vehicle_service(db=db, vs_id=vs_id, vs=item)
     if not db_item:
         raise HTTPException(status_code=404, detail="Item not found")
@@ -46,7 +85,11 @@ def update_vs(vs_id: int, item: schema_vs.UsuariosVehiculoServicioUpdate, curren
 
 
 @router.delete("/{vs_id}", status_code=204)
-def delete_vs(vs_id: int, current_user: model_user.User = Depends(get_current_user), db: Session = Depends(get_db)):
+def delete_vs(
+    vs_id: int, 
+    current_user: model_user.User = Depends(get_current_user), 
+    db: Session = Depends(get_db)
+):
     db_item = crud.delete_vehicle_service(db=db, vs_id=vs_id)
     if not db_item:
         raise HTTPException(status_code=404, detail="Item not found")

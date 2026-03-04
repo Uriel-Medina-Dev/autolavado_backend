@@ -1,25 +1,26 @@
-'''
-Docstring for schemas.schema_rol
-'''
 from pydantic import BaseModel
 from datetime import datetime
+from typing import Optional
+
+
 class RolBase(BaseModel):
-    '''Clase para modelar los campos de tabla Rol'''
-    name:str
-    status: bool
-    creation_date: datetime
-    update_date: datetime
-# pylint: disable=too-few-public-methods, unnecessary-pass
+    name: str
+    status: bool = True
+
+
 class RolCreate(RolBase):
-    '''Clase para crear un Rol basado en la tabla Rols'''
-    pass
-class RolUpdate(RolBase):
-    '''Clase para actualizar un Rol basado en la tabla Rols'''
     pass
 
+
+class RolUpdate(BaseModel):
+    name: Optional[str] = None
+    status: Optional[bool] = None
+
+
 class Rol(RolBase):
-    '''Clase para realizar operaciones por ID en tabla Rol'''
-    Id: int
+    id: int
+    creation_date: Optional[datetime] = None  # 👈 Permitir None
+    update_date: Optional[datetime] = None  # 👈 Permitir None
+
     class Config:
-        '''Utilizar el orm para ejecutar las funcionalidades'''
-        orm_mode =True
+        from_attributes = True

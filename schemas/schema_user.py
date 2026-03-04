@@ -1,40 +1,39 @@
-'''
-Docstring for schemas.schema_usuario
-'''
-from typing import Optional
+from pydantic import BaseModel, Field
 from datetime import datetime
-from pydantic import BaseModel
+from typing import Optional
+
 
 class UsuarioBase(BaseModel):
-    '''Clase para modelar los campos de tabla Usuarios'''
     rol_Id: int
     user_name: str
     user_1lastname: str
-    user_2lastname: str
+    user_2lastname: Optional[str] = None
     user: str
-    user_password: str
-    user_address: str
-    user_phone: str
-    status: bool
-    creation_date: datetime
-    modification_date: datetime
-# pylint: disable=too-few-public-methods, unnecessary-pass
+    user_address: Optional[str] = None
+    user_phone: Optional[str] = None
+    status: bool = True
+
+
 class UsuarioCreate(UsuarioBase):
-    '''Clase para crear un Usuario basado en la tabla Usuario'''
-    pass
-class UsuarioUpdate(UsuarioBase):
-    '''Clase para actualizar un Usuario basado en la tabla Usuario'''
-    pass
+    user_password: str = Field(..., min_length=6)
+
+
+class UsuarioUpdate(BaseModel):
+    rol_Id: Optional[int] = None
+    user_name: Optional[str] = None
+    user_1lastname: Optional[str] = None
+    user_2lastname: Optional[str] = None
+    user: Optional[str] = None
+    user_password: Optional[str] = Field(None, min_length=6)
+    user_address: Optional[str] = None
+    user_phone: Optional[str] = None
+    status: Optional[bool] = None
+
 
 class Usuario(UsuarioBase):
-    '''Clase para realizar operaciones por ID en tabla Usuario'''
     Id: int
-    class Config:
-        '''Utilizar el orm para ejecutar las funcionalidades'''
-        orm_mode = True
+    creation_date: Optional[datetime] = None  # 👈 Permitir None
+    modification_date: Optional[datetime] = None  # 👈 Permitir None
 
-class UsuarioLogin(BaseModel):
-    '''Clase para realizar login por numero de telefono o correo'''
-    user: Optional[str] = None
-    user_phone: Optional[str] = None
-    user_password: str
+    class Config:
+        from_attributes = True  # para SQLAlchemy 2.0 (antes era orm_mode)
