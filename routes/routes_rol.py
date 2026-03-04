@@ -7,7 +7,7 @@ import crud.crud_rols as crud
 from typing import List
 from routes.routes_auth import get_current_user
 import models.model_user as model_user
-import core.security as auth.py
+import core.security as auth
 
 rol = APIRouter()
 
@@ -29,7 +29,7 @@ async def read_rols(skip: int = 0, limit: int = 10, db: Session = Depends(get_db
     return db_rol
 
 @rol.get("/rol/{rol_id}", response_model=schemas.schema_rols.Rol, tags=["Roles"])
-async def read_rol(rol_id: int, db: Session = Depends(verify_token_header)):
+async def read_rol(rol_id: int, db: Session = Depends(get_db)):
     db_rol = crud.get_rol_by_id(db=db, rol_id=rol_id)
     if not db_rol:
         raise HTTPException(status_code=404, detail="Rol not found")

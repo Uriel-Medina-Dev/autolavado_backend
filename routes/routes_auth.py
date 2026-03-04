@@ -24,16 +24,6 @@ def get_db():
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security), db: Session = Depends(get_db)) -> User:
     """
     Valida el token JWT y retorna el usuario actual
-    
-    Args:
-        credentials: Credenciales HTTP con el token
-        db: Sesión de base de datos
-        
-    Returns:
-        Usuario si el token es válido
-        
-    Raises:
-        HTTPException si el token es inválido o expirado
     """
     token = credentials.credentials
     token_data = decode_token(token)
@@ -45,7 +35,9 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
             headers={"WWW-Authenticate": "Bearer"},
         )
     
+    # Buscar por Id (con mayúscula) en la tabla tbb_user
     user = db.query(User).filter(User.Id == token_data.user_id).first()
+    
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -53,7 +45,6 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
             headers={"WWW-Authenticate": "Bearer"},
         )
     return user
-
 
 @router.post("/login", response_model=Token)
 async def login(credentials: Login, db: Session = Depends(get_db)):

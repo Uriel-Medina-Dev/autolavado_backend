@@ -5,8 +5,9 @@ sqlalchemy
 
 # Autenticación y seguridad
 python-jose[cryptography]
-passlib[bcrypt]
+#passlib[bcrypt]
 python-multipart
+bcrypt
 
 # Base de datos (elige solo una según tu motor)
 pymysql  # Para MySQL
