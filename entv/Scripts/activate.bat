@@ -8,7 +8,7 @@ if defined _OLD_CODEPAGE (
     "%SystemRoot%\System32\chcp.com" 65001 > nul
 )
 
-set "VIRTUAL_ENV=C:\Users\PC-20\Desktop\autolavado_backend\entv"
+set "VIRTUAL_ENV=C:\Users\jesus\Desktop\autolavado_backend\entv"
 
 if not defined PROMPT set PROMPT=$P$G
 
