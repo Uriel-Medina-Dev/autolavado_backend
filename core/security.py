@@ -12,7 +12,7 @@ load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
 if not SECRET_KEY:
     print("⚠️ ADVERTENCIA: SECRET_KEY no está definida en .env, usando valor por defecto para desarrollo")
-    SECRET_KEY = "dev_secret_key_change_me_in_production_123456789"
+    SECRET_KEY = "dev_secret_key"
 
 # Configuración de JWT
 ALGORITHM = "HS256"
