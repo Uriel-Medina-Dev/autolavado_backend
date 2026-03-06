@@ -1,5 +1,5 @@
 """Esta clase permite generar el modelo para las ventas y asignaciones"""
-from sqlalchemy import Column, Integer, Boolean, DateTime, Date, Time, ForeignKey, Enum as SqlEnum
+from sqlalchemy import Column, Integer, Boolean, DateTime, Date, Time, ForeignKey, Enum as SqlEnum, Float
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 import enum
@@ -26,6 +26,7 @@ class VehiculoServicio(Base):
     date = Column(Date, nullable=False)
     time = Column(Time, nullable=False)
     estatus = Column(SqlEnum(SolicitudEstatus), nullable=False, default=SolicitudEstatus.Programada)
+    descuento = Column(Float, nullable=True, default=0)  # 👈 NUEVO: porcentaje o monto de descuento
     estado = Column(Boolean, default=True)
     fecha_registro = Column(DateTime, server_default=func.now(), nullable=False)
     fecha_actualizacion = Column(DateTime, onupdate=func.now())

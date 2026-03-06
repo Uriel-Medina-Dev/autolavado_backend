@@ -8,15 +8,23 @@ import os
 # Cargar las variables de entorno
 load_dotenv()
 
-# Obtener SECRET_KEY desde el .env
+# Obtener SECRET_KEY desde el .env - SIN VALOR POR DEFECTO
 SECRET_KEY = os.getenv("SECRET_KEY")
 if not SECRET_KEY:
-    print("⚠️ ADVERTENCIA: SECRET_KEY no está definida en .env, usando valor por defecto para desarrollo")
-    SECRET_KEY = "dev_secret_key"
+    print("="*60)
+    print("❌ ERROR CRÍTICO: SECRET_KEY no está definida en el archivo .env")
+    print("📌 Define SECRET_KEY en tu archivo .env")
+    print("="*60)
+    raise ValueError("SECRET_KEY no está configurada")
 
 # Configuración de JWT
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))  # 24 horas por defecto
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))
+
+print(f"🔐 Configuración de seguridad cargada:")
+print(f"   - SECRET_KEY: {SECRET_KEY[:10]}...")
+print(f"   - ALGORITHM: {ALGORITHM}")
+print(f"   - ACCESS_TOKEN_EXPIRE_MINUTES: {ACCESS_TOKEN_EXPIRE_MINUTES}")
 
 def get_password_hash(password: str) -> str:
     """Genera un hash de la contraseña usando bcrypt"""
@@ -43,14 +51,13 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     
     return bcrypt.checkpw(plain_bytes, hashed_bytes)
 
-# Mantener compatibilidad
 hash_password = get_password_hash
 
 def create_access_token(data: dict, expires_delta: timedelta = None) -> str:
-    """Crea un token JWT - Asegura que el subject sea string"""
+    """Crea un token JWT"""
     to_encode = data.copy()
     
-    # IMPORTANTE: Convertir el subject a string si no lo es
+    # Convertir subject a string
     if "sub" in to_encode and not isinstance(to_encode["sub"], str):
         to_encode["sub"] = str(to_encode["sub"])
     
@@ -61,8 +68,8 @@ def create_access_token(data: dict, expires_delta: timedelta = None) -> str:
     
     to_encode.update({"exp": expire})
     
-    print(f"🔐 Creando token para user_id: {to_encode.get('sub')} (tipo: {type(to_encode.get('sub'))})")
-    print(f"🔐 Expira: {expire}")
+    print(f"🔐 Creando token para user_id: {to_encode.get('sub')}")
+    print(f"🔐 Usando SECRET_KEY: {SECRET_KEY[:15]}...")
     
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
@@ -71,6 +78,8 @@ def decode_token(token: str):
     """Decodifica un JWT y devuelve un objeto con el campo user_id"""
     try:
         print(f"🔓 Decodificando token: {token[:30]}...")
+        print(f"🔓 Usando SECRET_KEY: {SECRET_KEY[:15]}...")
+        print(f"🔓 Usando algoritmo: {ALGORITHM}")
         
         # Decodificar el token
         decoded = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
@@ -78,14 +87,13 @@ def decode_token(token: str):
         print(f"✅ Token decodificado exitosamente")
         print(f"📦 Payload: {decoded}")
         
-        # El payload contiene 'sub' con el id de usuario (ahora como string)
         user_id = decoded.get("sub")
         
         if not user_id:
             print("❌ No se encontró 'sub' en el payload")
             return None
         
-        # Convertir a entero si es necesario (para la BD)
+        # Convertir a entero
         try:
             user_id_int = int(user_id)
         except (ValueError, TypeError):
@@ -105,7 +113,6 @@ def decode_token(token: str):
                 time_left = exp_date - now
                 print(f"⏳ Tiempo restante: {time_left}")
         
-        # Crear un objeto simple para mantener compatibilidad
         from types import SimpleNamespace
         return SimpleNamespace(user_id=user_id_int, payload=decoded)
         
@@ -119,8 +126,7 @@ def decode_token(token: str):
         print(f"❌ Error JWT: {e}")
         return None
     except Exception as e:
-        print(f"❌ Error inesperado decodificando token: {e}")
+        print(f"❌ Error inesperado: {e}")
         return None
 
-# Mantener compatibilidad
 verify_token = decode_token
