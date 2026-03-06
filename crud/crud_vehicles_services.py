@@ -1,5 +1,5 @@
 """CRUD para vehículos servicios - operaciones básicas y consultas complejas"""
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, aliased
 from sqlalchemy import func, extract
 from models.model_vehicles_services import VehiculoServicio
 from models.model_vehicle import Vehicle
@@ -13,10 +13,7 @@ from typing import List, Optional, Dict
 # ============= OPERACIONES BÁSICAS CRUD =============
 
 def get_vehicles_services(db: Session, skip: int = 0, limit: int = 100):
-    """
-    Obtener todas las asignaciones
-    ¡EL NOMBRE DEBE SER EXACTAMENTE ESTE!
-    """
+    """Obtener todas las asignaciones"""
     return db.query(VehiculoServicio).offset(skip).limit(limit).all()
 
 
@@ -88,6 +85,11 @@ def get_asignaciones_completas(
     """
     Obtener asignaciones con toda la información mediante JOINs
     """
+    # Crear alias para las diferentes relaciones de usuario
+    Propietario = aliased(User, name="propietario")
+    Cajero = aliased(User, name="cajero")
+    Operativo = aliased(User, name="operativo")
+    
     query = db.query(
         VehiculoServicio.Id.label("asignacion_id"),
         VehiculoServicio.date,
@@ -131,11 +133,11 @@ def get_asignaciones_completas(
     ).join(
         Vehicle, VehiculoServicio.vehicle_Id == Vehicle.Id
     ).join(
-        User, Vehicle.usuario_Id == User.Id  # Propietario
+        Propietario, Vehicle.usuario_Id == Propietario.Id  # Propietario
     ).join(
-        User.alias("cajero"), VehiculoServicio.cajero_Id == Cajero.Id
+        Cajero, VehiculoServicio.cajero_Id == Cajero.Id  # Cajero
     ).join(
-        User.alias("operativo"), VehiculoServicio.operativo_Id == Operativo.Id
+        Operativo, VehiculoServicio.operativo_Id == Operativo.Id  # Operativo
     ).join(
         Servicios, VehiculoServicio.servicio_Id == Servicios.Id
     ).filter(
