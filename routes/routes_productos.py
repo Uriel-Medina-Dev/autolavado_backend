@@ -106,7 +106,7 @@ def create_producto(
     current_user: model_user.User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Crear un nuevo producto"""
+    """Crear un nuevo producto (registra movimiento inicial en inventario)"""
     # Verificar si ya existe un producto con el mismo código
     existing = crud.get_producto_by_codigo(db=db, codigo=producto.codigo)
     if existing:
@@ -122,6 +122,7 @@ def create_producto(
             detail="El precio de venta no puede ser menor al precio de compra"
         )
     
+    # 👇 PASAR usuario_id para registrar en inventario
     return crud.create_producto(db=db, producto=producto, usuario_id=current_user.Id)
 
 

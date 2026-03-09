@@ -1,7 +1,7 @@
-"""CRUD para productos"""
+"""contendra el crud de productos"""
 from sqlalchemy.orm import Session
-from sqlalchemy import or_
 from models.model_producto import Producto
+from models.model_inventario import Inventario, TipoMovimiento
 from schemas.schema_producto import ProductoCreate, ProductoUpdate
 from datetime import datetime
 from typing import Optional, List
@@ -43,16 +43,16 @@ def get_producto_by_codigo(db: Session, codigo: str):
 def search_productos(db: Session, search_term: str, limit: int = 20):
     """Buscar productos por nombre, código o descripción"""
     return db.query(Producto).filter(
-        or_(
-            Producto.nombre.ilike(f"%{search_term}%"),
-            Producto.codigo.ilike(f"%{search_term}%"),
-            Producto.descripcion.ilike(f"%{search_term}%")
-        )
+        Producto.nombre.ilike(f"%{search_term}%") |
+        Producto.codigo.ilike(f"%{search_term}%") |
+        Producto.descripcion.ilike(f"%{search_term}%")
     ).limit(limit).all()
 
 
 def create_producto(db: Session, producto: ProductoCreate, usuario_id: Optional[int] = None):
-    """Crear un nuevo producto"""
+    """Crear un nuevo producto y registrar movimiento inicial en inventario"""
+    
+    # Crear el producto
     db_producto = Producto(
         codigo=producto.codigo,
         nombre=producto.nombre,
@@ -70,32 +70,72 @@ def create_producto(db: Session, producto: ProductoCreate, usuario_id: Optional[
         fecha_registro=datetime.now(),
         fecha_actualizacion=datetime.now()
     )
+    
     db.add(db_producto)
+    db.flush()  # Para obtener el ID del producto sin commitear aún
+    
+    # 👇 REGISTRAR MOVIMIENTO INICIAL EN INVENTARIO
+    if producto.stock_actual > 0:
+        movimiento_inventario = Inventario(
+            producto_id=db_producto.Id,
+            tipo_movimiento=TipoMovimiento.ENTRADA,
+            cantidad=producto.stock_actual,
+            stock_anterior=0,
+            stock_nuevo=producto.stock_actual,
+            concepto="Stock inicial",
+            referencia="CREACIÓN",
+            notas=f"Stock inicial al crear el producto {producto.nombre}",
+            usuario_id=usuario_id or producto.usuario_registro_id,
+            fecha_registro=datetime.now(),
+            fecha_actualizacion=datetime.now()
+        )
+        db.add(movimiento_inventario)
+    
     db.commit()
     db.refresh(db_producto)
     return db_producto
 
 
-def update_producto(db: Session, producto_id: int, producto: ProductoUpdate):
+def update_producto(db: Session, producto_id: int, producto: ProductoUpdate, usuario_id: Optional[int] = None):
     """Actualizar un producto existente"""
     db_producto = db.query(Producto).filter(Producto.Id == producto_id).first()
     if db_producto:
+        # Guardar stock anterior para posible registro
+        stock_anterior = db_producto.stock_actual
+        
         update_data = producto.dict(exclude_unset=True)
         for field, value in update_data.items():
             setattr(db_producto, field, value)
         
         db_producto.fecha_actualizacion = datetime.now()
+        
+        # 👇 Si se actualizó el stock, registrar movimiento
+        if 'stock_actual' in update_data and update_data['stock_actual'] != stock_anterior:
+            diferencia = update_data['stock_actual'] - stock_anterior
+            tipo = TipoMovimiento.ENTRADA if diferencia > 0 else TipoMovimiento.SALIDA
+            
+            movimiento_inventario = Inventario(
+                producto_id=db_producto.Id,
+                tipo_movimiento=tipo,
+                cantidad=abs(diferencia),
+                stock_anterior=stock_anterior,
+                stock_nuevo=update_data['stock_actual'],
+                concepto="Actualización manual",
+                referencia="UPDATE",
+                notas=f"Actualización de stock vía PUT",
+                usuario_id=usuario_id,
+                fecha_registro=datetime.now(),
+                fecha_actualizacion=datetime.now()
+            )
+            db.add(movimiento_inventario)
+        
         db.commit()
         db.refresh(db_producto)
     return db_producto
 
 
 def delete_producto(db: Session, producto_id: int, hard_delete: bool = False):
-    """
-    Eliminar un producto
-    - hard_delete=True: Eliminación física de la BD
-    - hard_delete=False: Eliminación lógica (cambiar estado a False)
-    """
+    """Eliminar un producto (lógica o físicamente)"""
     db_producto = db.query(Producto).filter(Producto.Id == producto_id).first()
     if db_producto:
         if hard_delete:
@@ -107,7 +147,7 @@ def delete_producto(db: Session, producto_id: int, hard_delete: bool = False):
     return db_producto
 
 
-def ajustar_stock(db: Session, producto_id: int, cantidad: int, es_suma: bool = True):
+def ajustar_stock(db: Session, producto_id: int, cantidad: int, es_suma: bool = True, usuario_id: Optional[int] = None):
     """
     Ajustar el stock de un producto
     - cantidad: número a sumar o restar
@@ -115,15 +155,35 @@ def ajustar_stock(db: Session, producto_id: int, cantidad: int, es_suma: bool = 
     """
     db_producto = db.query(Producto).filter(Producto.Id == producto_id).first()
     if db_producto:
+        stock_anterior = db_producto.stock_actual
+        
         if es_suma:
             db_producto.stock_actual += cantidad
+            tipo = TipoMovimiento.ENTRADA
         else:
             if db_producto.stock_actual >= cantidad:
                 db_producto.stock_actual -= cantidad
+                tipo = TipoMovimiento.SALIDA
             else:
                 return None  # Stock insuficiente
         
         db_producto.fecha_actualizacion = datetime.now()
+        
+        # 👇 Registrar movimiento en inventario
+        movimiento = Inventario(
+            producto_id=db_producto.Id,
+            tipo_movimiento=tipo,
+            cantidad=cantidad,
+            stock_anterior=stock_anterior,
+            stock_nuevo=db_producto.stock_actual,
+            concepto="Ajuste manual",
+            referencia="AJUSTE",
+            notas=f"Ajuste de stock vía función",
+            usuario_id=usuario_id,
+            fecha_registro=datetime.now(),
+            fecha_actualizacion=datetime.now()
+        )
+        db.add(movimiento)
         db.commit()
         db.refresh(db_producto)
     return db_producto
@@ -149,6 +209,6 @@ def get_resumen_stock(db: Session):
     return {
         "total_productos": total_productos,
         "total_stock": total_stock,
-        "valor_inventario": valor_inventario,
+        "valor_inventario": round(valor_inventario, 2),
         "productos_bajo_stock": productos_bajo_stock
     }

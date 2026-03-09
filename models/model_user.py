@@ -31,5 +31,8 @@ class User(Base):
     # Relación con cajero (información adicional, NO reemplaza al rol)
     cajero_info = relationship("Cajero", back_populates="usuario", uselist=False)
     
+    # Relación con inventario 
+    movimientos_inventario = relationship("Inventario", back_populates="usuario")
+    
     # Relación con productos que registró
     productos_registrados = relationship("Producto", back_populates="usuario_registro")

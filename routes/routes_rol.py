@@ -36,7 +36,7 @@ async def read_rol(rol_id: int,current_user: model_user.User = Depends(get_curre
     return db_rol
 
 @rol.post("/", response_model=schemas.schema_rols.Rol)
-async def create_rol(rol: schemas.schema_rols.RolCreate,current_user: model_user.User = Depends(get_current_user),  db: Session = Depends(get_db)):
+async def create_rol(rol: schemas.schema_rols.RolCreate, current_user: model_user.User = Depends(get_current_user), db: Session = Depends(get_db)):
     return crud.create_rol(db=db, rol=rol)
 
 @rol.put("/{rol_id}", response_model=schemas.schema_rols.Rol)

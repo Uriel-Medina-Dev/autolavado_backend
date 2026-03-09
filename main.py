@@ -7,14 +7,21 @@ import config.db
 import os
 from dotenv import load_dotenv
 
-# Importar modelos (para que se creen las tablas)
+# ⚠️ IMPORTANTE: Importar modelos en el orden correcto (sin relaciones cruzadas aún)
 import models.model_rols
-import models.model_user
+import models.model_user  # Primero User sin relaciones con inventario
 import models.model_service
 import models.model_vehicle
 import models.model_vehicles_services
-import models.model_producto
-import models.model_cajero  # 👈 NUEVO
+import models.model_producto  # Producto sin relación con inventario aún
+import models.model_cajero
+
+# 👇 Ahora importamos inventario (que crea relación con User y Producto)
+import models.model_inventario
+
+# 👇 Forzar la configuración de mappers después de todos los imports
+from sqlalchemy.orm import configure_mappers
+configure_mappers()  # Esto resuelve las relaciones cruzadas
 
 # Importar routers
 from routes.routes_auth import router as auth_router
@@ -24,7 +31,8 @@ from routes.routes_user import router as users_router
 from routes.routes_vehicle import router as vehicles_router
 from routes.routes_vehicles_services import router as vehicle_services_router
 from routes.routes_productos import router as productos_router
-from routes.routes_cajeros import router as cajeros_router  # 👈 NUEVO
+from routes.routes_cajeros import router as cajeros_router
+from routes.routes_inventario import router as inventario_router
 
 # Configuración
 load_dotenv()
@@ -52,6 +60,14 @@ try:
     print("📦 Creando/verificando tablas...")
     config.db.Base.metadata.create_all(bind=config.db.engine)
     print("✅ Tablas listas")
+    print("   - tbc_rols")
+    print("   - tbb_user")
+    print("   - tbc_servicios")
+    print("   - tbb_vehicles")
+    print("   - tbd_vehicles_services")
+    print("   - tbc_productos")
+    print("   - tbb_cajeros")
+    print("   - tbd_inventario")
 except Exception as e:
     print(f"❌ Error: {e}")
 
@@ -63,7 +79,8 @@ app.include_router(services_router)
 app.include_router(vehicles_router)
 app.include_router(vehicle_services_router)
 app.include_router(productos_router)
-app.include_router(cajeros_router)  # 👈 NUEVO
+app.include_router(cajeros_router)
+app.include_router(inventario_router)
 
 @app.get("/")
 async def root():
@@ -78,7 +95,8 @@ async def root():
             "vehicles": "/vehicles",
             "vehicle_services": "/vehicle_services",
             "productos": "/productos",
-            "cajeros": "/cajeros"  # 👈 NUEVO
+            "cajeros": "/cajeros",
+            "inventario": "/inventario"
         }
     }
 
