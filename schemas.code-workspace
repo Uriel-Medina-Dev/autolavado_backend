@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "schemas",
+			"path": "../autolavado_backend_8B/schemas"
+		},
+		{
+			"name": "autolavado_backend",
+			"path": "."
+		}
+	],
+	"settings": {}
+}
